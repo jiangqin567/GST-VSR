@@ -21,8 +21,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--upscale_factor", type=int, default=4)
     parser.add_argument('--gpu_mode', type=bool, default=True)
-    parser.add_argument('--patch_size', type=int, default=64)  #一张图片分成很多个patch,送入神经网络进行卷积，patch32表示裁剪成32*32的块
-    parser.add_argument('--batch_size', type=int, default=16)   #batch表示一次处理16张图片
+    parser.add_argument('--patch_size', type=int, default=64)  
+    parser.add_argument('--batch_size', type=int, default=16)   
     parser.add_argument('--epoch', type=int, default=200000, help='number of iterations to train')
     parser.add_argument('--trainset_dir', type=str, default='data/train1')
     parser.add_argument('--frame_num', type=int, default=5)
@@ -96,7 +96,7 @@ def main(cfg):
         scheduler.step()
 
         info_dir = 'info'
-        with open(info_dir + '/info.txt', 'a') as f:  # 设置文件对象
+        with open(info_dir + '/info.txt', 'a') as f: 
             print('Iteration---%6d,   criterion---%f' % (idx_iter + 1, np.array(loss_list).mean()), file=f)
 
         # print('Iteration---%6d,   criterion---%f' % (idx_iter + 1, np.array(loss_list).mean()))
@@ -104,12 +104,12 @@ def main(cfg):
         # loss_list = []
 
         # save checkpoint
-        # if idx_iter % 10 == 0:   #第0、5000、10000
+        # if idx_iter % 10 == 0: 
         #
         #     print('Iteration---%6d,   criterion---%f' % (idx_iter + 1, np.array(loss_list).mean()))
         #     torch.save(net.state_dict(), 'log/BI_x' + str(cfg.upscale_factor) + '_iter' + str(idx_iter) + '.pth')
         #     loss_list = []
-        if idx_iter % 100 == 0:  # 第0、5000、10000
+        if idx_iter % 100 == 0: 
             loss_mean = np.array(loss_list).mean()
 
             # writer_iter.add_scalar('Loss/Train_iter', loss_mean.item(), idx_iter)

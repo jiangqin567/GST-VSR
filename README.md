@@ -8,7 +8,7 @@ First create the testing dataset.
 
 ## Creating the test set ## 
 
-1. Put the downloaded test and train videos in the dollowing path:
+Put the downloaded test and train videos in the dollowing path:
 
 `data/raw_videos`
 

@@ -2,7 +2,7 @@ from generate_mod_LR_bic import generate_mod_LR_bic
 import os
 import glob
 
-folder_dir= '/home/fz/VSR/data/test'
+folder_dir= '../data/test'
 
 scale = 4
 folder_in = os.listdir(folder_dir)

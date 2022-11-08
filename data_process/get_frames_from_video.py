@@ -18,23 +18,23 @@ def video_to_frames(video_path, video_name, dir):
     print(frames)
     frames = int(frames)
 
-    if dir.split('/')[-1] == "train2":
+    if dir.split('/')[-1] == "train":
         frames = 50
 
     for i in range(frames):
         print(i)
         ret, frame = videoCapture.read()
-        cv2.imwrite(target_path + "\hr%d.png" % (i), frame)
+        cv2.imwrite(target_path + "\hr_%d.png" % (i), frame)
 
 
 if __name__ == '__main__':
-    video_path = "E:\Video_4K"
+    video_path = "../data/raw_videos/train"
 
-    train_dir ="../data/train2"
-    test_dir = "../data/test2"
+    train_dir ="../data/train"
+    test_dir = "../data/test"
 
-    train_txt = 'E:/Video_4K/train.txt'
-    test_txt = 'E:/Video_4K/test.txt'
+    train_txt = '../data/raw_videos/train.txt'
+    test_txt = '../data/raw_videos/test.txt'
 
 
     with open(train_txt) as f:
@@ -50,6 +50,7 @@ if __name__ == '__main__':
 
     for i, mov_path in enumerate(mov_files):
         print(mov_path)
+
 
         if mov_path.split('\\')[-1].split('.')[0] in train_list:
             video_name = mov_path.split('\\')[-1].split('.')[0]

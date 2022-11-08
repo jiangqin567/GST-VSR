@@ -1,5 +1,3 @@
-import torch
-# import cupy as np
 import cv2
 import math
 import numpy as np
@@ -7,12 +5,6 @@ from data_utils import toTensor, rgb2ycbcr
 import PIL.Image as Image
 import array
 import os
-import scipy.ndimage
-# from scipy.io import imread
-# from cupy._math import explog
-from numpy.ma.core import exp
-from scipy.constants import pi
-
 
 
 # from skimage.metrics import structural_similarity as ssim
@@ -36,7 +28,12 @@ def psnr2(img1, img2):
     return psnr2
 
 
-
+import numpy
+import scipy.ndimage
+# from scipy.io import imread
+from numpy.ma.core import exp
+from scipy.constants.constants import pi
+import cv2
 
 '''
 The function to compute SSIM
@@ -59,8 +56,8 @@ def compute_ssim(img_mat_1, img_mat_2):
                 exp(-(((i - 5) ** 2) + ((j - 5) ** 2)) / (2 * (gaussian_kernel_sigma ** 2)))
 
     # Convert image matrices to double precision (like in the Matlab version)
-    img_mat_1 = img_mat_1.astype(np.float64)
-    img_mat_2 = img_mat_2.astype(np.float64)
+    img_mat_1 = img_mat_1.astype(numpy.float64)
+    img_mat_2 = img_mat_2.astype(numpy.float64)
 
     # Squares of input matrices
     img_mat_1_sq = img_mat_1 ** 2
@@ -68,8 +65,8 @@ def compute_ssim(img_mat_1, img_mat_2):
     img_mat_12 = img_mat_1 * img_mat_2
 
     # Means obtained by Gaussian filtering of inputs
-    img_mat_mu_1 = scipy.ndimage.convolve(img_mat_1, gaussian_kernel)
-    img_mat_mu_2 = scipy.ndimage.convolve(img_mat_2, gaussian_kernel)
+    img_mat_mu_1 = scipy.ndimage.filters.convolve(img_mat_1, gaussian_kernel)
+    img_mat_mu_2 = scipy.ndimage.filters.convolve(img_mat_2, gaussian_kernel)
 
     # Squares of means
     img_mat_mu_1_sq = img_mat_mu_1 ** 2
@@ -77,11 +74,11 @@ def compute_ssim(img_mat_1, img_mat_2):
     img_mat_mu_12 = img_mat_mu_1 * img_mat_mu_2
 
     # Variances obtained by Gaussian filtering of inputs' squares
-    img_mat_sigma_1_sq = scipy.ndimage.convolve(img_mat_1_sq, gaussian_kernel)
-    img_mat_sigma_2_sq = scipy.ndimage.convolve(img_mat_2_sq, gaussian_kernel)
+    img_mat_sigma_1_sq = scipy.ndimage.filters.convolve(img_mat_1_sq, gaussian_kernel)
+    img_mat_sigma_2_sq = scipy.ndimage.filters.convolve(img_mat_2_sq, gaussian_kernel)
 
     # Covariance
-    img_mat_sigma_12 = scipy.ndimage.convolve(img_mat_12, gaussian_kernel)
+    img_mat_sigma_12 = scipy.ndimage.filters.convolve(img_mat_12, gaussian_kernel)
 
     # Centered squares of variances
     img_mat_sigma_1_sq = img_mat_sigma_1_sq - img_mat_mu_1_sq
@@ -107,32 +104,29 @@ def compute_ssim(img_mat_1, img_mat_2):
                (img_mat_sigma_1_sq + img_mat_sigma_2_sq + c_2)
     # SSIM
     ssim_map = num_ssim / den_ssim
-    index = np.average(ssim_map)
+    index = numpy.average(ssim_map)
 
     return index
 
 
 if __name__ == '__main__':
-    dir = 'data/test'
+    dir = 'data/test1'
+    video_list = os.listdir(dir)
+    
     psnr_list = []
     ssim_list = []
-
-    video_list = os.listdir(dir)
     for video_name in video_list:
-
-        hr_dir = dir + '/'+ video_name + '/' +'hr'
-        sr_dir = "results480P"
+        hr_dir = dir +'/' + video_name + "/hr"
+        sr_dir = "results600M"
         metric_dir = "metrics"
-
+    # video_name = 'calendar'
         print(video_name)
-        psnr_video = []
+        psnr_video = []                     
         ssim_video = []
         for idx_frame in range(2, 47):
             print(idx_frame)
-            # img_hr = cv2.imread(hr_dir + '/hr' + str(idx_frame) + '.png')
-            img_hr = cv2.imread(hr_dir +  '/lr'+ str(idx_frame) + '.png')
-
-            # img_hr = cv2.imread(hr_dir + '/hr_' + str(idx_frame).rjust(2,'0'') + '.png')
+            img_hr = cv2.imread(hr_dir + '/hr' + str(idx_frame) + '.png')
+        # img_hr = cv2.imread(hr_dir + '/hr_' + str(idx_frame).rjust(2,'0') + '.png')
             img_sr = cv2.imread(sr_dir +'/' + video_name +'/' + 'sr_'+ str(idx_frame).rjust(2, '0') + '.png')
 
             imag1, _, _ = rgb2ycbcr(img_hr)
@@ -143,24 +137,25 @@ if __name__ == '__main__':
         psnr_video = np.array(psnr_video)
         ssim_video = np.array(ssim_video)
         psnr = np.mean(psnr_video)
+        psnr_list.append(psnr)
+        
         ssim = np.mean(ssim_video)
-
+        ssim_list.append(ssim)
 
         print('%s -------Mean PSNR:   %0.4f' % (video_name, psnr))
         print('%s -------Mean SSIM:   %0.4f' % (video_name, ssim))
 
-        psnr_list.append(psnr)
-        ssim_list.append(ssim)
 
-
-        with open(metric_dir + '/results1900.txt', 'a') as f:  # 设置文件对象
+        
+        with open(metric_dir + '/600M_test.txt', 'a') as f:  
             print('%s -------Mean PSNR:   %0.4f' % (video_name, psnr), file=f)
             print('%s -------Mean SSIM:   %0.4f' % (video_name, ssim), file=f)
-
-    psnr_average= np.mean(np.array(psnr_list))
+    psnr_average = np.mean(np.array(psnr_list))
     ssim_average = np.mean(np.array(ssim_list))
 
-    with open(metric_dir + '/results1900.txt', 'a') as f:  # 设置文件对象
-        print('Average PSNR:   %0.4f' % (psnr_average), file=f)
-        print('Average SSIM:   %0.4f' % (ssim_average), file=f)
+    with open(metric_dir +'/600M_test.txt','a') as f:
+        print('Average PSNR:    %0.4f' % psnr_average , file = f)
+        print('Average SSIM:    %0.4f' % ssim_average, file =f)
+
+
 

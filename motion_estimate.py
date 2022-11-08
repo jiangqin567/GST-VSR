@@ -38,13 +38,15 @@ class ResB(nn.Module):
         out = out + x
         return out
 
+
+
 class MEnet(nn.Module):
     def __init__(self, upscale_factor):
         super(MEnet, self).__init__()
         self.upscale_factor = upscale_factor
         self.leaky_relu = nn.LeakyReLU(0.1, inplace=True)
-        self.upsample = nn.Upsample(scale_factor=upscale_factor, mode='bicubic')
-        # self.upsample = nn.Upsample(scale_factor=upscale_factor, mode='bilinear')
+        self.upsample = nn.Upsample(scale_factor=2, mode='bicubic')
+        # self.ConvOffset2d = deform_conv.ConvOffset2d(64, 64, 3, padding=1, num_deformable_groups=8)
         self.shuffle = nn.PixelShuffle(upscale_factor)  # *4
 
         # feature extra
@@ -57,11 +59,12 @@ class MEnet(nn.Module):
         self.bottleneck = nn.Conv2d(64 * 2, 32, 3, 1, 1, bias=False)
         self.conv_3 = nn.Conv2d(32, 2, 3, 1, 1, bias=False)
 
-
+    
     def forward(self, x):
         input = self.conv_1(x)  # 16*64*64*64
         out_1 = self.ResB(input)  # [16, 64, 64, 64]
         out_1 = self.leaky_relu(out_1)
+
         out_2 = self.conv_2(out_1)  # 16*128*64*64
         out_2 = self.leaky_relu(out_2)
         out_3 = self.bottleneck(out_2)  # [16, 32, 64, 64]
@@ -69,5 +72,8 @@ class MEnet(nn.Module):
         out_4 = self.conv_3(out_3)  # [16, 2, 64, 64]
         out_4 = self.leaky_relu(out_4)
         optical_flow = out_4  # [16, 2, 64, 64]
+
+        # ME_res = optical_flow_warp(torch.unsqueeze(x[:, 0, :, :], dim=1), optical_flow) - torch.unsqueeze(
+        #         x[:, 1, :, :], dim=1)
 
         return optical_flow

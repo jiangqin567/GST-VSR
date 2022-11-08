@@ -18,7 +18,7 @@ For Pixabay-Set dataset, run the dollowing command:
 
 Then, please run the dollowing command to obtain the LR frame
 
-'python data_process/generate_data_from_frame1.py'
+`python data_process/generate_data_from_frame1.py`
 
 ## Start testing ## 
 
